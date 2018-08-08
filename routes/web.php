@@ -1,16 +1,27 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+Route::get('/', 'HomeController@index');
 
-Route::get('/', function () {
-    return view('welcome');
+Auth::routes();
+
+Route::get('/firm/{firm}', 'FirmController@show')->name('public.profile');
+
+Route::group(['middleware' => 'auth'], function() {
+    Route::get('/profile', 'FirmProfileController@show')->name('profile');
+
+    Route::group(['prefix' => 'profile'], function() {
+        Route::get('/', 'FirmProfileController@show')->name('profile');
+        Route::delete('/{firm}', 'FirmProfileController@deactivate')->name('profile.deactivate');
+    });
+
+    Route::group(['prefix' => 'api'], function() {
+        Route::get('/profile', 'Api\FirmProfileController@show');
+        Route::post('/profile', 'Api\FirmProfileController@update');
+
+        Route::post('/addresses', 'Api\FirmProfileController@addAddress');
+        Route::delete('/addresses/{id}', 'Api\FirmProfileController@removeAddress');
+
+        Route::post('/employees', 'Api\FirmProfileController@addEmployee');
+        Route::delete('/employees/{id}', 'Api\FirmProfileController@removeEmployee');
+    });
 });
